@@ -21,7 +21,7 @@ public class TableEntity {
      */
     private String tableName;
     /**
-     * 表名称对应的java名称 下划线转大驼峰
+     * 表名称对应的java bean名称 下划线转大驼峰
      */
     private String tableBeanName;
     /**

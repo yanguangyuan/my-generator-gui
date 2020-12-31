@@ -12,24 +12,69 @@ import java.util.stream.Collectors;
 
 /**
  * @Author yanguangyuan
- * @Description 生成文件处理
+ * @Description 生成文件对外开放
  * @createTime 2020年12月30日 15:46:00
  */
 public class GeneratorSubject {
 
-
+    /**
+     * 对外开发处理 通过ui参数生成文件
+     *
+     * @param config
+     */
     public void process(GeneratorConfig config) {
         config.getCheckTables().forEach((db, tableNames) -> tableNames.forEach(tableName -> {
-            Table table = DbFactory.getDatabase(db).getTableByName(tableName);
-            TableEntity tableEntity = transformTable2Entity(table);
-            if (Boolean.TRUE.equals(config.getDoCheck())){
-                IGenerator generator = new DoGenerator(tableEntity,config.getAuthor(),config.getDaoPath(),config.getServicePath(),config.getControllerPath());
+            GeneratorContext context = buildGeneratorContext(config, db, tableName);
+            //生成do
+            if (Boolean.TRUE.equals(config.getDoCheck())) {
+                IGenerator generator = GeneratorFactory.doGenerator(context);
+                generator.process();
+            }
+            //生成mapper
+            if (Boolean.TRUE.equals(config.getMapperCheck())) {
+                IGenerator generator = GeneratorFactory.mapperGenerator(context);
+                generator.process();
+            }
+            //生成service
+            if (Boolean.TRUE.equals(config.getServiceCheck())) {
+                IGenerator generator = GeneratorFactory.serviceGenerator(context);
+                generator.process();
+            }
+            //生成dto
+            if (Boolean.TRUE.equals(config.getDtoCheck())) {
+                IGenerator generator = GeneratorFactory.dtoGenerator(context);
                 generator.process();
             }
         }));
         AlertUtils.success("生成完成！");
     }
 
+    /**
+     * 构建生成上下文
+     *
+     * @param config
+     * @param db
+     * @param tableName
+     * @return
+     */
+    private GeneratorContext buildGeneratorContext(GeneratorConfig config, DbConfig db, String tableName) {
+        Table table = DbFactory.getDatabase(db).getTableByName(tableName);
+        TableEntity tableEntity = transformTable2Entity(table);
+        return GeneratorContext.builder()
+                .author(config.getAuthor())
+                .tableEntity(tableEntity)
+                .daoPath(config.getDaoPath())
+                .servicePath(config.getServicePath())
+                .controllerPath(config.getControllerPath())
+                .build();
+    }
+
+    /**
+     * 将数据库表转为java属性表
+     *
+     * @param table
+     * @return
+     */
     private TableEntity transformTable2Entity(Table table) {
         TableEntity result = new TableEntity();
         result.setTableName(table.getTableName());
@@ -40,6 +85,12 @@ public class GeneratorSubject {
         return result;
     }
 
+    /**
+     * 将数据库列转为 java属性列
+     *
+     * @param column
+     * @return
+     */
     private ColumnEntity transformColumn2Entity(Column column) {
         ColumnEntity result = new ColumnEntity();
         result.setColumnName(column.getColumnName());
@@ -54,7 +105,7 @@ public class GeneratorSubject {
     }
 
     /**
-     * 类型转化
+     * 表字段类型与java类型转化
      *
      * @param type
      * @return

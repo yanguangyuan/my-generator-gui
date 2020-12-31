@@ -23,6 +23,17 @@ public class StringUtil {
         cs[0] -= 32;
         return String.valueOf(cs);
     }
+
+    /**
+     * 大驼峰转小驼峰
+     * @param str
+     * @return
+     */
+    public static String bigHump2SmallHump(String str){
+        char[] cs = str.toCharArray();
+        cs[0] += 32;
+        return String.valueOf(cs);
+    }
     /**
      * 下划线转小驼峰
      *
