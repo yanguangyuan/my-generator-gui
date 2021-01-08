@@ -1,6 +1,8 @@
 package com.learn.ygy.generate;
 
 import com.learn.ygy.generate.mapper.MybatisPlusMapperGenerator;
+import com.learn.ygy.generate.mapper.NamedParameterJdbcTemplateDaoGenerator;
+import com.learn.ygy.generate.mapper.entity.MybatisDoGenerator;
 import com.learn.ygy.generate.mapper.entity.MybatisPlusDoGenerator;
 import com.learn.ygy.generate.service.MybatisPlusServiceGenerator;
 import com.learn.ygy.generate.service.entity.DtoGenerator;
@@ -19,7 +21,7 @@ public class GeneratorFactory {
      * @return
      */
     public static IGenerator doGenerator(GeneratorContext context) {
-        return new MybatisPlusDoGenerator(context);
+        return new MybatisDoGenerator(context);
     }
 
     /**
@@ -29,7 +31,7 @@ public class GeneratorFactory {
      * @return
      */
     public static IGenerator mapperGenerator(GeneratorContext context) {
-        return new MybatisPlusMapperGenerator(context);
+        return new NamedParameterJdbcTemplateDaoGenerator(context);
     }
 
     /**
