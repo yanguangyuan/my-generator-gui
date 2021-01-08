@@ -24,9 +24,8 @@ public class ${ClassName} extends BaseDao{
     /**
     * insert
     */
-    private static final String SQL_INSERT="INSERT INTO "+
-                                           "${TableName}(<#list ColumnEntities as ColumnEntity>${insert_columns_is_first?string("",",")}${ColumnEntity.columnName}<#assign insert_columns_is_first=false/></#list>)"
-                                          +"VALUES(<#list ColumnEntities as ColumnEntity>${insert_properties_is_first?string("",",")}:${ColumnEntity.propertyName}<#assign insert_properties_is_first=false/></#list>);"
+    private static final String SQL_INSERT="INSERT INTO ${TableName}(<#list ColumnEntities as ColumnEntity>${insert_columns_is_first?string("",",")}${ColumnEntity.columnName}<#assign insert_columns_is_first=false/></#list>)"+
+                                           "VALUES(<#list ColumnEntities as ColumnEntity>${insert_properties_is_first?string("",",")}:${ColumnEntity.propertyName}<#assign insert_properties_is_first=false/></#list>)";
     /**
     * 不带where的更新语句--注意带where
     */

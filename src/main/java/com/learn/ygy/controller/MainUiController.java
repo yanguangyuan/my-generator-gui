@@ -1,9 +1,10 @@
 package com.learn.ygy.controller;
 
-import com.learn.ygy.entity.DbConfig;
 import com.learn.ygy.db.DbFactory;
 import com.learn.ygy.db.Sqlite;
+import com.learn.ygy.entity.DbConfig;
 import com.learn.ygy.entity.GeneratorConfig;
+import com.learn.ygy.enums.VersionEnum;
 import com.learn.ygy.generate.GeneratorSubject;
 import com.learn.ygy.utils.AlertUtils;
 import com.mysql.jdbc.StringUtils;
@@ -29,7 +30,7 @@ import java.util.*;
  */
 @NoArgsConstructor
 @Slf4j
-public class MainUiController extends BaseUiController{
+public class MainUiController extends BaseUiController {
 
     @FXML
     private TreeView<String> dbTree;
@@ -55,8 +56,10 @@ public class MainUiController extends BaseUiController{
     private CheckBox controllerCheckBox;
     @FXML
     private CheckBox voCheckBox;
+    @FXML
+    private ChoiceBox<String> versionChoiceBox;
 
-    private Map<DbConfig, Set<String>> checkTables=new HashMap<>(8);
+    private Map<DbConfig, Set<String>> checkTables = new HashMap<>(8);
 
     private GeneratorSubject generatorSubject = new GeneratorSubject();
 
@@ -67,9 +70,11 @@ public class MainUiController extends BaseUiController{
 
 
     @FXML
-    public void generator(){
-        log.info("选中表数据为{}",checkTables);
-        if(checkTables.isEmpty()){
+    public void generator() {
+        String version = versionChoiceBox.getValue();
+        log.info("选中的版本：{}", version);
+        log.info("选中表数据为{}", checkTables);
+        if (checkTables.isEmpty()) {
             AlertUtils.fail("请选择表数据");
             return;
         }
@@ -81,18 +86,19 @@ public class MainUiController extends BaseUiController{
             AlertUtils.fail("请确定作者");
             return;
         }
-        if(StringUtils.isNullOrEmpty(daoPath)){
+        if (StringUtils.isNullOrEmpty(daoPath)) {
             AlertUtils.fail("请确定dao路径");
             return;
         }
-        if(StringUtils.isNullOrEmpty(servicePath)){
+        if (StringUtils.isNullOrEmpty(servicePath)) {
             AlertUtils.fail("请确定service路径");
             return;
         }
-        if(StringUtils.isNullOrEmpty(controllerPath)){
+        if (StringUtils.isNullOrEmpty(controllerPath)) {
             AlertUtils.fail("请确定controller路径");
             return;
         }
+
         GeneratorConfig config = GeneratorConfig.builder()
                 .checkTables(checkTables)
                 .author(author)
@@ -105,32 +111,36 @@ public class MainUiController extends BaseUiController{
                 .dtoCheck(dtoCheckBox.isSelected())
                 .controllerCheck(controllerCheckBox.isSelected())
                 .voCheck(voCheckBox.isSelected())
+                .versionEnum(VersionEnum.getByValue(version))
                 .build();
         generatorSubject.process(config);
 
     }
 
-    private File selectedFolder(){
+    private File selectedFolder() {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setInitialDirectory(new File("D:\\workspace\\java\\self-test\\src\\main\\java\\com\\keytop\\superpark\\selftest\\dao\\mysql\\test"));
         return directoryChooser.showDialog(primaryStage);
     }
+
     @FXML
-    public void chooseDaoFolder(){
+    public void chooseDaoFolder() {
         File selectedFolder = selectedFolder();
         if (selectedFolder != null) {
             daoPathField.setText(selectedFolder.getAbsolutePath());
         }
     }
+
     @FXML
-    public void chooseServiceFolder(){
+    public void chooseServiceFolder() {
         File selectedFolder = selectedFolder();
         if (selectedFolder != null) {
             servicePathField.setText(selectedFolder.getAbsolutePath());
         }
     }
+
     @FXML
-    public void chooseControllerFolder(){
+    public void chooseControllerFolder() {
         File selectedFolder = selectedFolder();
         if (selectedFolder != null) {
             controllerPathField.setText(selectedFolder.getAbsolutePath());
@@ -168,6 +178,16 @@ public class MainUiController extends BaseUiController{
             controller.setMainUiController(this);
             controller.showDialogStage();
         });
+        initDbTree();
+        initVersionChoiceBox();
+    }
+
+    /**
+     * 初始化db tree
+     *
+     * @throws Exception
+     */
+    private void initDbTree() throws Exception {
         dbTree.setShowRoot(false);
         dbTree.setRoot(new TreeItem<>());
         Callback<TreeView<String>, TreeCell<String>> defaultCellFactory = TextFieldTreeCell.forTreeView();
@@ -197,7 +217,7 @@ public class MainUiController extends BaseUiController{
                             sqlite.delete(dbConfig);
                             this.loadDbTree();
                         } catch (Exception e) {
-                            log.error("删除失败",e);
+                            log.error("删除失败", e);
                             AlertUtils.fail("Delete connection failed! Reason: " + e.getMessage());
                         }
                     });
@@ -205,8 +225,8 @@ public class MainUiController extends BaseUiController{
                     cell.setContextMenu(contextMenu);
                 }
                 if (event.getClickCount() == 2) {
-                    if(treeItem == null) {
-                        return ;
+                    if (treeItem == null) {
+                        return;
                     }
                     treeItem.setExpanded(true);
                     if (level == 1) {
@@ -222,8 +242,8 @@ public class MainUiController extends BaseUiController{
                                     checkBox.setOnAction(event1 -> {
                                         if (event1.getSource() instanceof CheckBox) {
                                             CheckBox c = (CheckBox) event1.getSource();
-                                            log.info("{}-{}",tableName,c.isSelected());
-                                            dbAndTableCheck(dbConfig,tableName,c.isSelected());
+                                            log.info("{}-{}", tableName, c.isSelected());
+                                            dbAndTableCheck(dbConfig, tableName, c.isSelected());
                                         }
                                     });
                                     checkBox.setId(tableName);
@@ -232,7 +252,7 @@ public class MainUiController extends BaseUiController{
                                     children.add(newTreeItem);
                                 }
                             }
-                        }catch (Exception e) {
+                        } catch (Exception e) {
                             log.error(e.getMessage(), e);
                             AlertUtils.fail(e.getMessage());
                         }
@@ -245,19 +265,29 @@ public class MainUiController extends BaseUiController{
     }
 
     /**
+     * 初始化版本下拉
+     */
+    private void initVersionChoiceBox() {
+        versionChoiceBox.getItems().addAll(VersionEnum.getEnumValues());
+        versionChoiceBox.setValue(VersionEnum.MYBATIS.getValue());
+    }
+
+
+    /**
      * 处理表选中复选框事件
+     *
      * @param dbConfig
      * @param tableName
      * @param isSelect
      */
-    private void dbAndTableCheck(DbConfig dbConfig,String tableName,Boolean isSelect){
+    private void dbAndTableCheck(DbConfig dbConfig, String tableName, Boolean isSelect) {
         Set<String> tables = checkTables.computeIfAbsent(dbConfig, k -> new HashSet<>(20));
         if (Boolean.TRUE.equals(isSelect)) {
             tables.add(tableName);
-        }else{
+        } else {
             tables.remove(tableName);
         }
-        if(tables.isEmpty()){
+        if (tables.isEmpty()) {
             checkTables.remove(dbConfig);
         }
     }

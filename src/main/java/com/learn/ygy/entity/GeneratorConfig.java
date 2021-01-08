@@ -1,5 +1,6 @@
 package com.learn.ygy.entity;
 
+import com.learn.ygy.enums.VersionEnum;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,4 +28,8 @@ public class GeneratorConfig {
     private Boolean dtoCheck;
     private Boolean controllerCheck;
     private Boolean voCheck;
+    /**
+     * 版本
+     */
+    private VersionEnum versionEnum;
 }

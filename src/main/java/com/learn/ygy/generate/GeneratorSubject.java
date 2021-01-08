@@ -66,6 +66,7 @@ public class GeneratorSubject {
                 .daoPath(config.getDaoPath())
                 .servicePath(config.getServicePath())
                 .controllerPath(config.getControllerPath())
+                .versionEnum(config.getVersionEnum())
                 .build();
     }
 

@@ -1,5 +1,6 @@
 package com.learn.ygy.generate;
 
+import com.learn.ygy.enums.VersionEnum;
 import com.learn.ygy.generate.mapper.MybatisPlusMapperGenerator;
 import com.learn.ygy.generate.mapper.NamedParameterJdbcTemplateDaoGenerator;
 import com.learn.ygy.generate.mapper.entity.MybatisDoGenerator;
@@ -21,6 +22,9 @@ public class GeneratorFactory {
      * @return
      */
     public static IGenerator doGenerator(GeneratorContext context) {
+        if (context.getVersionEnum() == VersionEnum.MYBATIS_PLUS) {
+            return new MybatisPlusDoGenerator(context);
+        }
         return new MybatisDoGenerator(context);
     }
 
@@ -31,7 +35,10 @@ public class GeneratorFactory {
      * @return
      */
     public static IGenerator mapperGenerator(GeneratorContext context) {
-        return new NamedParameterJdbcTemplateDaoGenerator(context);
+        if (context.getVersionEnum() == VersionEnum.NAMED_PARAMETER_JDBC_TEMPLATE) {
+            return new NamedParameterJdbcTemplateDaoGenerator(context);
+        }
+        return new MybatisPlusMapperGenerator(context);
     }
 
     /**

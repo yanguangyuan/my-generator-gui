@@ -1,6 +1,7 @@
 package com.learn.ygy.generate;
 
 import com.learn.ygy.entity.TableEntity;
+import com.learn.ygy.enums.VersionEnum;
 import freemarker.template.Configuration;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,6 +18,7 @@ import lombok.ToString;
 @ToString
 @Builder
 public class GeneratorContext {
+    private VersionEnum versionEnum;
     /**
      * 作者
      */
